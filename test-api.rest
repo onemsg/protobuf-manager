@@ -1,0 +1,64 @@
+@devhost=http://localhost:8888
+
+# About Application
+
+###
+GET {{devhost}}/api/application
+SERVICE-AUTH-USERNAME: onemsg
+
+###
+GET {{devhost}}/api/application/123456
+SERVICE-AUTH-USERNAME: onemsg
+
+###
+GET {{devhost}}/api/application/1
+SERVICE-AUTH-USERNAME: onemsg
+
+
+# About Protobuf
+
+###
+GET {{devhost}}/api/protobuf?search=A&pageIndex=1&pageSize=10
+SERVICE-AUTH-USERNAME: onemsg
+
+### 
+GET {{devhost}}/api/protobuf/1
+SERVICE-AUTH-USERNAME: onemsg
+
+### 
+GET {{devhost}}/api/protobuf/7
+SERVICE-AUTH-USERNAME: onemsg
+
+###
+GET {{devhost}}/api/protobuf?search=&pageIndex=1&pageSize=5
+SERVICE-AUTH-USERNAME: onemsg
+
+###
+GET {{devhost}}/api/protobuf?search=cms_oneconfig_server&pageIndex=1&pageSize=5
+SERVICE-AUTH-USERNAME: onemsg
+
+###
+POST {{devhost}}/api/protobuf
+SERVICE-AUTH-USERNAME: onemsg
+Content-Type: application/json
+
+{
+    "applicationId": 1,
+    "name": "book_server",
+    "intro": "book_server pb",
+    "owner": "mashugaung",
+    "lastModifier": "mashugaung"
+}
+
+###
+DELETE {{devhost}}/api/application/2
+SERVICE-AUTH-USERNAME: onemsg
+
+
+# Others
+
+###
+GET {{devhost}}/api/400
+
+
+

@@ -1,0 +1,58 @@
+[
+    {
+        "applicationId": 1,
+        "name": "server-A",
+        "intro": "server A inrto ...",
+        "owner": "onemsg",
+        "lastModifier": "onemsg"
+    },
+    {
+        "applicationId": 1,
+        "name": "server-B",
+        "intro": "server B inrto ...",
+        "owner": "onemsg",
+        "lastModifier": "onemsg"
+    },
+    {
+        "applicationId": 1,
+        "name": "server-C",
+        "intro": "server C inrto ...",
+        "owner": "Eunzel",
+        "lastModifier": "Eunzel"
+    },
+    {
+        "applicationId": 1,
+        "name": "server-D",
+        "intro": "server D inrto ...",
+        "owner": "Eunzel",
+        "lastModifier": "Eunzel"
+    },
+    {
+        "applicationId": 1,
+        "name": "server-D",
+        "intro": "server D inrto ...",
+        "owner": "Eunzel",
+        "lastModifier": "Eunzel"
+    },
+    {
+        "applicationId": 2,
+        "name": "server-E",
+        "intro": "server E inrto ...",
+        "owner": "Vito",
+        "lastModifier": "Vito"
+    },
+    {
+        "applicationId": 2,
+        "name": "server-F",
+        "intro": "server F inrto ...",
+        "owner": "Vito",
+        "lastModifier": "Vito"
+    },
+    {
+        "applicationId": 2,
+        "name": "server-G",
+        "intro": "server G inrto ...",
+        "owner": "Vito",
+        "lastModifier": "Vito"
+    }
+]

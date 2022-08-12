@@ -1,0 +1,42 @@
+:root {
+    --length-unit: 8px
+}
+
+a.is-clear {
+    text-decoration: inherit;
+    color: inherit
+}
+
+.has-text-weight-medium {
+    font-weight: 600;
+}
+
+main.main-part {
+    flex-grow: 1;
+}
+
+section.main-part {
+    margin: 40px;
+    margin-top: 24px;
+}
+
+.link-button-active {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.border_unless {
+    border-radius: 0;
+}
+
+.has-flex-grow-1 {
+    flex-grow: 1
+}
+
+.nav-title {
+    text-transform: initial;
+    background-color: inherit;
+}
+
+.nav-title.is-active {
+    background-color: rgb(255, 255, 255, 0.3);
+}

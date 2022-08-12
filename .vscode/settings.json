@@ -1,0 +1,6 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.autobuild.enabled": false,
+    "java.eclipse.downloadSources": true,
+    "java.maven.downloadSources": true,
+}
