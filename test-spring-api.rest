@@ -1,0 +1,79 @@
+@devhost=http://localhost:5000
+
+# About Application
+
+###
+GET {{devhost}}/api/application/name?groupId=1
+
+###
+GET {{devhost}}/api/application/groups
+
+###
+POST {{devhost}}/api/application
+Content-Type: application/json
+
+{
+    "name": "order-server",
+    "intro": "订单服务, 提供订单相关接口",
+    "groupId": 1,
+    "creator": "onemsg"
+}
+
+###
+DELETE {{devhost}}/api/application/8
+
+### About protobuf
+GET {{devhost}}/api/protobuf?search=order-server
+
+###
+GET {{devhost}}/api/protobuf?search=
+
+###
+GET {{devhost}}/api/protobuf/3
+
+###
+POST {{devhost}}/api/protobuf
+Content-Type: application/json
+
+{
+    "applicationId": 10,
+    "name": "order_service",
+    "intro": "订单服务rpc接口",
+    "protocol": "grpc",
+    "creator": "onemsg"
+}
+
+###
+PUT {{devhost}}/api/protobuf/1/intro
+Content-Type: application/json
+
+{
+    "intro": "订单服务rpc接口的描述"
+}
+
+###
+PUT {{devhost}}/api/protobuf/3/current-version
+Content-Type: application/json
+
+{
+    "version": 102
+}
+
+###
+DELETE {{devhost}}/api/protobuf/3
+
+###
+POST {{devhost}}/api/protobuf/code
+Content-Type: application/json
+
+{
+    "protoId": 4,
+    "code": "code...",
+    "creator": "onemsg"
+}
+
+###
+GET {{devhost}}/api/protobuf/code/18
+
+###
+GET {{devhost}}/api/protobuf/4/code
