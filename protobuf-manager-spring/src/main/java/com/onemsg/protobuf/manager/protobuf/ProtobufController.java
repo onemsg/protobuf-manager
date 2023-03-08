@@ -19,9 +19,12 @@ import com.onemsg.protobuf.manager.exception.NotExistedException;
 import com.onemsg.protobuf.manager.model.Pageable;
 import com.onemsg.protobuf.manager.model.Totalable;
 import com.onemsg.protobuf.manager.protobuf.model.Protobuf;
-import com.onemsg.protobuf.manager.protobuf.model.ProtobufCode;
 import com.onemsg.protobuf.manager.protobuf.model.Protobuf.SearchVo;
+import com.onemsg.protobuf.manager.protobuf.model.ProtobufCode;
 import com.onemsg.protobuf.manager.web.DataModel;
+
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 
 @RestController
 @RequestMapping("/api/protobuf")
@@ -30,6 +33,9 @@ public class ProtobufController {
     @Autowired
     private ProtobufService protobufService;
     
+    @Autowired
+    private Validator validator;
+
     /**
      * 
      * @param search 搜索词，应用名|protobuf名|author名
@@ -62,6 +68,11 @@ public class ProtobufController {
     @PostMapping
     public ResponseEntity<DataModel> create(@RequestBody Protobuf.Creation creation) {
 
+        var errors = validator.validate(creation);
+        if (!errors.isEmpty()) {
+            throw new ConstraintViolationException(errors);
+        }
+
         try {
             int id = protobufService.create(creation);
             URI uri = URI.create("/api/protobuf/" + id);
@@ -73,6 +84,12 @@ public class ProtobufController {
 
     @PutMapping("/{id}/intro")
     public ResponseEntity<DataModel> updateIntro(@PathVariable int id, @RequestBody Protobuf.UpdateIntro updateIntro ) {
+
+        var errors = validator.validate(updateIntro);
+        if (!errors.isEmpty()) {
+            throw new ConstraintViolationException(errors);
+        }
+        
         try {
             protobufService.updateIntro(id, updateIntro.intro);
             return ResponseEntity.ok(DataModel.updatedOK(id));
@@ -84,6 +101,12 @@ public class ProtobufController {
     @PutMapping("/{id}/current-version")
     public ResponseEntity<DataModel> updateCurrentVersion(@PathVariable int id, 
             @RequestBody Protobuf.UpdateVersion updateVersion ) {
+
+        var errors = validator.validate(updateVersion);
+        if (!errors.isEmpty()) {
+            throw new ConstraintViolationException(errors);
+        }
+        
         try {
             protobufService.updateCurrentVersion(id, updateVersion.version);
             return ResponseEntity.ok(DataModel.updatedOK(id));
@@ -100,6 +123,12 @@ public class ProtobufController {
 
     @PostMapping("/code")
     public ResponseEntity<DataModel> createProtobufCode(@RequestBody ProtobufCode.Creation creation) {
+
+        var errors = validator.validate(creation);
+        if (!errors.isEmpty()) {
+            throw new ConstraintViolationException(errors);
+        }
+
         try {
             int id = protobufService.createProtobufCode(creation);
             return ResponseEntity.ok(DataModel.createdOK(id));

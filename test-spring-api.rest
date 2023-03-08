@@ -15,8 +15,8 @@ Content-Type: application/json
 {
     "name": "order-server",
     "intro": "订单服务, 提供订单相关接口",
-    "groupId": 1,
-    "creator": "onemsg"
+    "groupId": 1
+
 }
 
 ###

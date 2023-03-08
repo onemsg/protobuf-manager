@@ -16,12 +16,20 @@ import com.onemsg.protobuf.manager.exception.DataModelResponseException;
 import com.onemsg.protobuf.manager.exception.NotExistedException;
 import com.onemsg.protobuf.manager.web.DataModel;
 
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/application")
 public class ApplicationController {
 
     @Autowired
     private ApplicationService applicationService;
+
+    @Autowired
+    private Validator validator;
 
     @GetMapping("/name")
     public ResponseEntity<DataModel> getNamesByGroupId(@RequestParam int groupId) {
@@ -41,6 +49,12 @@ public class ApplicationController {
 
     @PostMapping
     public ResponseEntity<DataModel> create(@RequestBody Application.Creation model) {
+
+        var errors = validator.validate(model);
+        if (!errors.isEmpty()) {
+            throw new ConstraintViolationException(errors);
+        }
+
         try {
             int id = applicationService.create(model);
             return ResponseEntity.status(201).body(DataModel.createdOK(id));
@@ -52,6 +66,11 @@ public class ApplicationController {
     
     @DeleteMapping("/{id}")
     public ResponseEntity<DataModel> deleteApplication(@PathVariable int id) {
+        
+        if (id < 0) {
+            throw new DataModelResponseException(400, 400, "Bad request");
+        }
+
         applicationService.remove(id);
         return ResponseEntity.ok(DataModel.deletedOK(id));
     }

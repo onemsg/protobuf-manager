@@ -8,6 +8,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.onemsg.protobuf.manager.exception.DataModelResponseException;
 import com.onemsg.protobuf.manager.exception.NotExistedException;
 
+import jakarta.validation.ConstraintViolationException;
+
 /**
  * WEB 全局异常处理器
  * 
@@ -22,6 +24,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NotExistedException.class)
     public ResponseEntity<Object> handleNotExistedException(NotExistedException exception) {
+        var e = new DataModelResponseException(exception);
+        return ResponseEntity.status(e.getStatus()).body(e.toJson());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException exception) {
         var e = new DataModelResponseException(exception);
         return ResponseEntity.status(e.getStatus()).body(e.toJson());
     }

@@ -2,7 +2,9 @@ package com.onemsg.protobuf.manager.exception;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.Getter;
 
 /**
@@ -32,6 +34,15 @@ public class DataModelResponseException extends RuntimeException {
         this.code = 404;
         this.message = exception.getMessage();
         addProperty("resouceId", exception.getId());
+    }
+
+    public DataModelResponseException(ConstraintViolationException exception) {
+        this.status = 400;
+        this.code = 400;
+        this.message = "Bad request body";
+        var errors = exception.getConstraintViolations().stream()
+            .collect(Collectors.toMap(e -> e.getPropertyPath().toString(), e -> e.getMessage()));
+        addProperty("errors", errors);
     }
 
     public Map<String, Object> toJson() {
