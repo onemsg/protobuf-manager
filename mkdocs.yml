@@ -1,0 +1,4 @@
+site_name: Protobuf Manager Docs
+theme: 
+  name: material
+repo_url: https://github.com/onemsg/protobuf-manager

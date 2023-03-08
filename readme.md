@@ -2,36 +2,33 @@
 
 Google protobuf 文件统一管理平台, 旨在解决 proto 文件统一管理，查询，编辑权限统一，文件快速分享，PB文件相互依赖问题
 
-😁更多功能还在完善中...
+- 支持 proto 按 Group、Application 分组创建、管理
+- 关键字搜索 proto
+- 支持前端管理平台
+- 支持用户验证、鉴权 [💡未来规划]
+- 完善前端控制台 [💡未来规划]
+- 支持 protobuf 校验 [💡未来规划]
+- 支持 protobuf 代码生成 [💡未来规划]
 
 ![首页-1](img/%E9%A6%96%E9%A1%B5-1.png)
 
-> 技术栈 - 后端 vert.x, 前端 mui
+### 项目目录
 
-## 启动
+- `db` - SQL 文件
+- `frontend` - 前端模块，基于 React + [MUI](https://mui.com/)
+- `protobuf-manager` - 后端模块 vert.x 实现
+- `protobuf-manager-spring` - 后端模块 spring 实现
 
-1. 启动后端 - `mvn exec:java -f .\protobuf-manager\pom.xml`
-2. 启动前端 - `cd frontend; npm start`
+### 启动
 
-## 功能表单
+1. 启动 vert.x 后端 - `mvn exec:java -f .\protobuf-manager\pom.xml`
+2. 启动 spring 后端 - `mvn spring-boot:run -f .\protobuf-manager-spring\pom.xml`
+3. 启动前端 - `cd frontend; npm start`
 
-- 服务列表
-    - 按 服务名、作者搜索
-    - 罗列服务列表
+> vert.x 和 spring 旨在使用不同的框架实现同样的功能
+## API & Test
 
-- 创建应用
+可以参考 
 
-- Protobuf
-    - 创建PB
-    - 编辑PB
-
-- 用户信息
-
-## API
-
-See [test-api.rest](test-api.rest)
-
-## 后续规划
-
-- 完善功能
-- 增加 protobuf 代码生成、下载
+- [test-api.rest](test-api.rest) for `protobuf-manager`
+- [test-spring-api.rest](test-spring-api.rest) for `protobuf-manager-spring`
