@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.onemsg.protobuf.manager.application.model.Application;
 import com.onemsg.protobuf.manager.exception.DataModelResponseException;
 import com.onemsg.protobuf.manager.exception.NotExistedException;
+import com.onemsg.protobuf.manager.user.UserModel;
 import com.onemsg.protobuf.manager.web.DataModel;
+import com.onemsg.protobuf.manager.web.WebContext;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -55,8 +57,10 @@ public class ApplicationController {
             throw new ConstraintViolationException(errors);
         }
 
+        UserModel.Info user = WebContext.currentWebContext().getUser();
+
         try {
-            int id = applicationService.create(model);
+            int id = applicationService.create(model, user.name());
             return ResponseEntity.status(201).body(DataModel.createdOK(id));
         } catch (NotExistedException e) {
             throw new DataModelResponseException(e);

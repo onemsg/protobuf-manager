@@ -1,5 +1,7 @@
 package com.onemsg.protobuf.manager;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,5 +25,13 @@ public class JsonTest {
         vo.version = 103;
         String s = objectMapper.writeValueAsString(vo);
         System.out.println(s);
+    }
+
+    @Test
+    public void testOptional() {
+        var r =  Optional.<String>empty()
+            .map(s -> s.isBlank())
+            .orElse(false);
+        System.out.println(r);
     }
 }

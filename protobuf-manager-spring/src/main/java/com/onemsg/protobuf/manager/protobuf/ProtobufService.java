@@ -62,9 +62,9 @@ public class ProtobufService {
     }
 
     @Transactional
-    public int create(Protobuf.Creation creation) throws NotExistedException {
+    public int create(Protobuf.Creation creation, String creator) throws NotExistedException {
         applicationService.existById(creation.applicationId);
-        return protobufRepository.insert(creation);
+        return protobufRepository.insert(creation, creator);
     }
 
     @Transactional
@@ -84,9 +84,9 @@ public class ProtobufService {
         }
     }
 
-    public int createProtobufCode(ProtobufCode.Creation creation) throws NotExistedException {
+    public int createProtobufCode(ProtobufCode.Creation creation, String creator) throws NotExistedException {
         existById(creation.protoId);
-        return protobufRepository.insertCode(creation);
+        return protobufRepository.insertCode(creation, creator);
     }
 
     public ProtobufCode.DetailVo getProtobufCodeById(int id) throws NotExistedException {

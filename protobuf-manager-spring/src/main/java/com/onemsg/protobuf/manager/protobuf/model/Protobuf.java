@@ -93,8 +93,6 @@ public class Protobuf {
         public String intro;
         @NotBlank
         public String protocol;
-        @NotBlank
-        public String creator;
     }
 
     public static class UpdateIntro {

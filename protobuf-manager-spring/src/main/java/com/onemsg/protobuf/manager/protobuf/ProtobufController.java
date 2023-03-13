@@ -22,6 +22,7 @@ import com.onemsg.protobuf.manager.protobuf.model.Protobuf;
 import com.onemsg.protobuf.manager.protobuf.model.Protobuf.SearchVo;
 import com.onemsg.protobuf.manager.protobuf.model.ProtobufCode;
 import com.onemsg.protobuf.manager.web.DataModel;
+import com.onemsg.protobuf.manager.web.WebContext;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -73,8 +74,10 @@ public class ProtobufController {
             throw new ConstraintViolationException(errors);
         }
 
+        var user = WebContext.currentWebContext().getUser();
+
         try {
-            int id = protobufService.create(creation);
+            int id = protobufService.create(creation, user.name());
             URI uri = URI.create("/api/protobuf/" + id);
             return ResponseEntity.created(uri).body(DataModel.createdOK(id));
         } catch (NotExistedException e) {
@@ -129,8 +132,10 @@ public class ProtobufController {
             throw new ConstraintViolationException(errors);
         }
 
+        var user = WebContext.currentWebContext().getUser();
+
         try {
-            int id = protobufService.createProtobufCode(creation);
+            int id = protobufService.createProtobufCode(creation, user.name());
             return ResponseEntity.ok(DataModel.createdOK(id));
         } catch (NotExistedException e) {
             throw new DataModelResponseException(e);

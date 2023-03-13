@@ -1,51 +1,60 @@
 @devhost=http://localhost:5000
+@cookie=
 
 # About Application
 
 ###
 GET {{devhost}}/api/application/name?groupId=1
+Cookie: {{cookie}}
 
 ###
 GET {{devhost}}/api/application/groups
+Cookie: {{cookie}}
 
 ###
 POST {{devhost}}/api/application
 Content-Type: application/json
+Cookie: {{cookie}}
 
 {
-    "name": "order-server",
-    "intro": "订单服务, 提供订单相关接口",
+    "name": "producer-server",
+    "intro": "商家服务, 提供商家相关接口",
     "groupId": 1
 
 }
 
 ###
 DELETE {{devhost}}/api/application/8
+Cookie: {{cookie}}
 
 ### About protobuf
 GET {{devhost}}/api/protobuf?search=order-server
+Cookie: {{cookie}}
 
 ###
 GET {{devhost}}/api/protobuf?search=
+Cookie: {{cookie}}
 
 ###
-GET {{devhost}}/api/protobuf/3
+GET {{devhost}}/api/protobuf/5
+Cookie: {{cookie}}
 
 ###
 POST {{devhost}}/api/protobuf
 Content-Type: application/json
+Cookie: {{cookie}}
 
 {
-    "applicationId": 10,
-    "name": "order_service",
-    "intro": "订单服务rpc接口",
-    "protocol": "grpc",
-    "creator": "onemsg"
+    "applicationId": 12,
+    "name": "producer_service",
+    "intro": "商家服务rpc接口",
+    "protocol": "grpc"
 }
 
 ###
 PUT {{devhost}}/api/protobuf/1/intro
 Content-Type: application/json
+Cookie: {{cookie}}
 
 {
     "intro": "订单服务rpc接口的描述"
@@ -54,6 +63,7 @@ Content-Type: application/json
 ###
 PUT {{devhost}}/api/protobuf/3/current-version
 Content-Type: application/json
+Cookie: {{cookie}}
 
 {
     "version": 102
@@ -61,10 +71,12 @@ Content-Type: application/json
 
 ###
 DELETE {{devhost}}/api/protobuf/3
+Cookie: {{cookie}}
 
 ###
 POST {{devhost}}/api/protobuf/code
 Content-Type: application/json
+Cookie: {{cookie}}
 
 {
     "protoId": 4,
@@ -74,6 +86,30 @@ Content-Type: application/json
 
 ###
 GET {{devhost}}/api/protobuf/code/18
+Cookie: {{cookie}}
 
 ###
 GET {{devhost}}/api/protobuf/4/code
+Cookie: {{cookie}}
+
+
+## About user
+
+###
+POST {{devhost}}/api/login
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "name": "Spring",
+    "password": "123456"
+}
+
+
+###
+POST {{devhost}}/api/logout
+Cookie: {{cookie}}
+
+###
+GET {{devhost}}/api/user/info
+Cookie: {{cookie}}

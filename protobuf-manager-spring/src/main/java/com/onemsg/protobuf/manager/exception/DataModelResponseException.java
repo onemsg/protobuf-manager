@@ -13,6 +13,14 @@ import lombok.Getter;
 @Getter
 public class DataModelResponseException extends RuntimeException {
 
+    /** 认证失败异常 */
+    public static final DataModelResponseException AUTHENTICATION_FAILURE = new DataModelResponseException(401, 401, 
+        "Authentication failure");
+
+    /** 鉴权失败异常 */
+    public static final DataModelResponseException AUTHORIZATION_FAILURE = new DataModelResponseException(403, 403,
+            "Authorization failure");
+
     private final int status;
     private final int code;
     private final String message;

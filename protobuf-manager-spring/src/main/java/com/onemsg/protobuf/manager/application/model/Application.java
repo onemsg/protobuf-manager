@@ -57,19 +57,8 @@ public class Application {
         @Nullable
         String intro,
         @Min(1)
-        int groupId,
-        @NotBlank
-        String creator
-    ) {
-        public Entity toEntity() {
-            Entity entity = new Entity();
-            entity.name = name;
-            entity.intro = intro;
-            entity.groupId = groupId;
-            entity.creator = creator;
-            return entity;
-        }
-    }
+        int groupId
+    ) { }
 
     public record UpdateIntro(
         String intro

@@ -50,7 +50,5 @@ public class ProtobufCode {
         public int protoId;
         @NotBlank
         public String code;
-        @NotBlank
-        public String creator;
     }
 }

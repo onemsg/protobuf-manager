@@ -64,10 +64,10 @@ public class ApplicationService implements InitializingBean {
      * @throws NotExistedException
      */
     @Transactional
-    public int create(Application.Creation model) throws NotExistedException {
+    public int create(Application.Creation model, String creator) throws NotExistedException {
         existGroupById(model.groupId());
         try {
-            int id = applicationRepository.save(model.name(), model.intro(), model.groupId(), model.creator());
+            int id = applicationRepository.save(model.name(), model.intro(), model.groupId(), creator);
             asyncRefreshStore();
             return id;
         } catch (DuplicateKeyException e) {

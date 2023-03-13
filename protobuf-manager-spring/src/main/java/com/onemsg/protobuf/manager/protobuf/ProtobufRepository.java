@@ -105,13 +105,13 @@ public class ProtobufRepository {
         return jdbcTemplate.update(sql, intro, id);
     }
 
-    public int insert(Creation creation) {
+    public int insert(Creation creation, String creator) {
         Map<String, Object> params = new HashMap<>();
         params.put("application_id", creation.applicationId);
         params.put("name", creation.name);
         params.put("intro", creation.intro);
         params.put("protocol", creation.protocol);
-        params.put("creator", creation.creator);
+        params.put("creator", creator);
         params.put("current_version", 0);
         return insertProtobuf.executeAndReturnKey(params).intValue();
     }
@@ -126,7 +126,7 @@ public class ProtobufRepository {
 
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public int insertCode(ProtobufCode.Creation creation) {
+    public int insertCode(ProtobufCode.Creation creation, String creator) {
 
         String sql = "SELECT version FROM `protobuf_code` WHERE protobuf_id = ?";
         List<Integer> versions = jdbcTemplate.queryForList(sql, Integer.class, creation.protoId);
@@ -136,7 +136,7 @@ public class ProtobufRepository {
         params.put("protobuf_id", creation.protoId);
         params.put("code", creation.code);
         params.put("version", version);
-        params.put("creator", creation.creator);
+        params.put("creator", creator);
         int id = insertProtobufCode.executeAndReturnKey(params).intValue();
 
         String updateSql = "UPDATE `protobuf` SET current_version = ? WHERE id = ?";

@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1001,
+        "name": "Spring",
+        "password": "123456",
+        "avatarUrl": "https://img2.woyaogexing.com/2023/03/12/6718d69abdde45ffa6d07958dc599ae9.jpg"
+    },
+    {
+        "id": 1002,
+        "name": "April",
+        "password": "123456",
+        "avatarUrl": "https://img2.woyaogexing.com/2023/03/12/6718d69abdde45ffa6d07958dc599ae9.jpg"
+    },
+        {
+        "id": 1003,
+        "name": "Lucy",
+        "password": "123456",
+        "avatarUrl": "https://img2.woyaogexing.com/2023/03/10/bcc9cd834d9f796a334fede44d3f1ab2.jpg"
+    }
+]
