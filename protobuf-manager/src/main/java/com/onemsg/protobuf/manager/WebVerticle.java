@@ -78,6 +78,7 @@ public class WebVerticle extends AbstractVerticle {
                 startPromise.fail(http.cause());
             }
         });
+
     }
 
     private static void handleFailure(RoutingContext ctx){
