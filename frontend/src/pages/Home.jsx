@@ -1,15 +1,13 @@
-import { Button, styled, TextField, Typography } from '@mui/material';
-import FormGroup from '@mui/material/FormGroup';
+import CachedIcon from '@mui/icons-material/Cached';
+import CreateIcon from '@mui/icons-material/Create';
+import SearchIcon from '@mui/icons-material/Search';
+import { Box, Button, IconButton, Stack, TextField } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import MainPart from '../layout/MainPart';
 
-import {
-  useSearchParams
-} from 'react-router-dom'
-import { AUTH_HEADERS } from '../api';
-
-
-function SearchPanel({initSearchParams, onSearch, onReload}){
+function ControlBar({onSearch, onReload}){
   const [search, setSearch] = useState("")
 
   const handleSearch = () => {
@@ -24,173 +22,180 @@ function SearchPanel({initSearchParams, onSearch, onReload}){
   }
 
   return (
-    <FormGroup row>
+    <Stack direction="row" alignItems="center" spacing={1} sx={{mb: 1}}>
       <TextField 
         id="search-field" 
-        label="搜索词"
+        hiddenLabel
         placeholder="服务名|PB名|Owner"
-        variant='filled'
-        sx={ { m: 2, width: 400} }
-        defaultValue={ initSearchParams?.search || ""}
+        variant='standard'
+        sx={ {width: 400} }
         onChange={ event => setSearch(event.target.value) } 
         onKeyUp={ handleKeyup }
       />
 
+      <IconButton type="button" aria-label="search" onClick={ handleSearch }>
+        <SearchIcon />
+      </IconButton>
+
+      <IconButton type="button" aria-label="reload" onClick={ onReload }>
+        <CachedIcon />
+      </IconButton>
+
+      <Box sx={ { flex: 1 } }></Box>
       <Button
-        variant='contained'
         color='primary'
-        onClick={ handleSearch }
-        sx={{m:2, width: 100}}
+        href='/protobuf/create'
+        startIcon={ <CreateIcon /> }
       >
-        Search
+        Create
       </Button>
-
-      <Button
-        variant="contained"
-        color="inherit"
-        onClick={ onReload }
-        sx={ { m: 2, width: 100 } }
-      >
-        Reload
-      </Button>
-
-    </FormGroup>
+    </Stack>
   )
 }
-
-/** 列定义 */
-const COLUMN_SCHEMA = [
-  {
-    field: "id",
-    headerName: "ID",
-    maxWidth: 70,
-    align: "right"
-  },
-  {
-    field: "group",
-    headerName: "Group",
-    minWidth: 150,
-    maxWidth: 200,
-    flex: 1
-  },
-  {
-    field: "application",
-    headerName: "Application",
-    minWidth: 250,
-    flex: 1
-  },
-  {
-    field: "name",
-    headerName: "Name",
-    minWidth: 250,
-    flex: 1
-  },
-  {
-    field: "path",
-    headerName: "Path",
-    maxWidth: 200,
-    flex: 1
-  },
-  {
-    field: "protocol",
-    headerName: "Protocol",
-    width: 150,
-  },
-  {
-    field: "lastVersion",
-    headerName: "Last Version",
-    align: "right",
-    minWidth: 150,
-    maxWidth: 200,
-    flex: 1
-  },
-  {
-    field: "owner",
-    headerName: "Owner",
-    minWidth: 150,
-    maxWidth: 200,
-    flex: 1
-  },
-  {
-    field: "modified",
-    headerName: "Last Modified",
-    minWidth: 200,
-    flex: 1
-  }
-]
 
 const DEFAULT_PAGEINDEX = 0
 const DEFAULT_PAGESIZE = 20
 
 function Home() {
 
+
   document.title = "Protobuf Management"
 
   const [isLoaded, setIsLoaded] = useState(true);
 
-  const [urlParams, setUrlParams] = useSearchParams({})
+  const [request, setRequest] = useState({
+    search: "",
+    pageIndex: DEFAULT_PAGEINDEX,
+    pageSize: DEFAULT_PAGESIZE,
+  })
 
-  const [pageIndex, setPageIndex] = useState(DEFAULT_PAGEINDEX)
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
-  const [total, setTotal] = useState(0)
-  const [rows, setRows] = useState([]);
+  const [data, setData] = useState({
+    pages: 0,
+    total: 0,
+    rows: []
+  })
 
-  const searchParams = {
-    search: urlParams.get('search')
-  }
 
   useEffect(() => {
-    const _searchParams = {
-      search: urlParams.get('search')
-    }
-    loadData({_searchParams}, pageIndex, pageSize)
-  }, [urlParams])
-
-  const loadData = (params, _pageIndex, _pageSize) => {
-    console.log("[INFO] Start fetch data -", params, _pageIndex, _pageSize)
     setIsLoaded(false)
-    let search = params?.search || ""
-    const url = `/api/protobuf?search=${search}&pageIndex=${_pageIndex + 1}&pageSize=${[_pageSize]}`
-    fetch(url, {headers: {...AUTH_HEADERS} })
+    const query = new URLSearchParams({
+      search: request.search,
+      pageIndex: request.pageIndex,
+      pageSize: request.pageSize
+    })
+    const url = "/api/protobuf?" + query.toString()
+    console.log("[INFO] Start fetch data - ", url)
+    fetch(url)
       .then(res => res.json())
       .then(
         body => {
-          setIsLoaded(true)
-          setRows(body.data)
-          setTotal(body.total)
+          if (body.code === 0) {
+            const data = body.data;
+            setData({ pages: data.pages, total: data.total, rows: data.data })
+          } else {
+            alert(body.message)
+          }
         },
         err => {
-          setIsLoaded(true)
           console.info("[ERROR] Http request %s failed - %s", url, err.toString())
         }
-      )
+      ).finally(() => {
+        setIsLoaded(true)
+      })
+  }, [request])
+
+
+  const handleSearch = (params) => {
+    setRequest({ ...request, search: params.search })
   }
 
-  const handleSearch = (submitSearchParams) => {
-    if (submitSearchParams.search === searchParams.search) {
-      loadData(searchParams, pageIndex, pageSize)
-    }
-    setUrlParams({ ...submitSearchParams})
-  }
+  const navigate = useNavigate();
 
   const handleReload = () => {
-    loadData(searchParams, pageIndex, pageSize)
+    navigate(0)
   }
 
-  const handlePageChange = (_page) => {
-    setPageIndex(_page)
-    loadData(searchParams, _page, pageSize)
+  const handlePageChange = (page) => {
+    setRequest({...request, pageIndex: page})
   }
 
-  const handlePageSizeChange = (_pageSize, details) => {
-    setPageSize(_pageSize)
-    loadData(searchParams, pageIndex, _pageSize)
+  const handlePageSizeChange = (pageSize, details) => {
+    setRequest({ ...request, pageSize: pageSize })
   }
+
+  const handleEnterDetail = (id) => {
+    navigate("/protobuf/" + id)
+  }
+
+  /** 列定义 */
+  const COLUMN_SCHEMA = [
+    {
+      field: "id",
+      headerName: "ID",
+      maxWidth: 70,
+      align: "right",
+      headerAlign: "right"
+    },
+    {
+      field: "group",
+      headerName: "Group",
+      minWidth: 150,
+    },
+    {
+      field: "application",
+      headerName: "Application",
+      minWidth: 150,
+    },
+    {
+      field: "name",
+      headerName: "Name",
+      minWidth: 200,
+    },
+    {
+      field: "path",
+      headerName: "Path",
+      minWidth: 200,
+      flex: 1
+    },
+    {
+      field: "protocol",
+      headerName: "Protocol",
+      maxWidth: 80,
+      align: "right",
+      headerAlign: "right"
+    },
+    {
+      field: "currentVersionText",
+      headerName: "Current Version",
+      minWidth: 120,
+      maxWidth: 200,
+      align: "right",
+      headerAlign: "right"
+    },
+    {
+      field: "creator",
+      headerName: "Creator",
+      minWidth: 80,
+      maxWidth: 150,
+    },
+    {
+      field: "updatedTime",
+      headerName: "Last Updated",
+      minWidth: 200,
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      minWidth: 150,
+      getActions: (params) => [
+        <Button key={ params.row.id } onClick={ () => handleEnterDetail(params.row.id) } >Detail</Button>,
+      ]
+    }
+  ]
 
   return (
-    <React.Fragment>
-      <SearchPanel 
-        initSearchParams={ searchParams }
+    <MainPart>
+      <ControlBar 
         onSearch={handleSearch}
         onReload={handleReload}
       />
@@ -198,18 +203,18 @@ function Home() {
       <DataGrid
         autoHeight
         loading={ !isLoaded }
-        rows={ rows }
+        rows={ data.rows }
         columns={ COLUMN_SCHEMA }
-        page={ pageIndex }
-        pageSize={ pageSize }
+        page={ request.pageIndex }
+        pageSize={ request.pageSize }
         onPageChange={ handlePageChange }
         onPageSizeChange={ handlePageSizeChange}
         rowsPerPageOptions={ [20, 50, 100] }
         paginationMode="server"
-        rowCount={total}
+        rowCount={data.total}
         disableSelectionOnClick
       />
-    </React.Fragment>
+    </MainPart>
   );
 }
 

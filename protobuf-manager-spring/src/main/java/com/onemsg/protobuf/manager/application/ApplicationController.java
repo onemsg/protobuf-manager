@@ -1,6 +1,5 @@
 package com.onemsg.protobuf.manager.application;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,32 +19,27 @@ import com.onemsg.protobuf.manager.web.WebContext;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
-import lombok.extern.slf4j.Slf4j;
+import lombok.AllArgsConstructor;
 
-@Slf4j
+
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/application")
 public class ApplicationController {
 
-    @Autowired
     private ApplicationService applicationService;
 
-    @Autowired
     private Validator validator;
+
+    @GetMapping()
+    public ResponseEntity<DataModel> getAll() {
+        var data = applicationService.getAll();
+        return ResponseEntity.ok(DataModel.ok(data));
+    }
 
     @GetMapping("/name")
     public ResponseEntity<DataModel> getNamesByGroupId(@RequestParam int groupId) {
-        try {
-            var data = applicationService.getNamesByGroupId(groupId);
-            return ResponseEntity.ok(DataModel.ok(data));
-        } catch (NotExistedException e) {
-            throw new DataModelResponseException(e);
-        }
-    }
-
-    @GetMapping("/groups")
-    public ResponseEntity<DataModel> getAllGroupNames() {
-        var data = applicationService.getAllGroupNames();
+        var data = applicationService.getNamesByGroupId(groupId);
         return ResponseEntity.ok(DataModel.ok(data));
     }
 

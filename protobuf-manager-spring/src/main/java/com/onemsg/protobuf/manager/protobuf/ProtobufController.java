@@ -45,7 +45,7 @@ public class ProtobufController {
      * @return
      */
     @GetMapping
-    public ResponseEntity<DataModel> search(@RequestParam String search, 
+    public ResponseEntity<DataModel> search(@RequestParam(required = false) String search, 
         @RequestParam(defaultValue = "0") int pageIndex, 
         @RequestParam(defaultValue = "20") int pageSize) {
 
@@ -118,6 +118,29 @@ public class ProtobufController {
         }
     }
 
+    @GetMapping("/{id}/current-code")
+    public ResponseEntity<DataModel> getCurrentProtobufCode(@PathVariable int id) {
+        try {
+            var data = protobufService.getCurrentProtobufCodeByProtobufId(id);
+            if (data == null) {
+                return ResponseEntity.ok(new DataModel(1, "Current ProtobufCode not set", null) );
+            }
+            return ResponseEntity.ok(DataModel.ok(data));
+        } catch (NotExistedException e) {
+            throw new DataModelResponseException(e);
+        }
+    }
+
+    @GetMapping("/{protobufId}/code")
+    public ResponseEntity<DataModel> getProtobufCodes(@PathVariable int protobufId) {
+        try {
+            var data = protobufService.getProtobufCodesByProtobufId(protobufId);
+            return ResponseEntity.ok(DataModel.ok(data));
+        } catch (NotExistedException e) {
+            throw new DataModelResponseException(e);
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable int id) {
         protobufService.delete(id);
@@ -151,15 +174,4 @@ public class ProtobufController {
             throw new DataModelResponseException(e);
         }
     }
-
-    @GetMapping("/{protobufId}/code")
-    public ResponseEntity<DataModel> getProtobufCodes(@PathVariable int protobufId) {
-        try {
-            var data = protobufService.getProtobufCodesByProtobufId(protobufId);
-            return ResponseEntity.ok(DataModel.ok(data));
-        } catch (NotExistedException e) {
-            throw new DataModelResponseException(e);
-        }
-    }
-
 }

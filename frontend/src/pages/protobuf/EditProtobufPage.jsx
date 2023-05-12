@@ -1,272 +1,107 @@
-import { Button, Container, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from "@mui/material";
+import { Button, Container, Stack, TextField, Select, FormControl, InputLabel } from "@mui/material";
 import { Box } from "@mui/system";
-import { useMemo, useState } from "react";
+
+import { React, useEffect, useState } from 'react';
+import { useForm } from "react-hook-form";
+import CreateIcon from '@mui/icons-material/Create';
+import MainPart from "../../layout/MainPart";
+
 import { useParams } from "react-router-dom";
 
+function EditProtobufPage() {
 
-const mockGouprs = [
-  {
-    label: "Group-A",
-    value: "Group-A",
-    applications: [
-      {
-        value: "application-1"
-      },
-      {
-        value: "application-2"
-      },
-      {
-        value: "application-3"
-      }
-    ]
-  },
-  {
-    label: "Group-B",
-    value: "Group-B",
-    applications: [
-      {
-        value: "application-11"
-      },
-      {
-        value: "application-12"
-      },
-      {
-        value: "application-13"
-      }
-    ]
-  },
-  {
-    label: "Group-C",
-    value: "Group-C",
-    applications: [
-      {
-        value: "application-21"
-      },
-      {
-        value: "application-22"
-      },
-      {
-        value: "application-23"
-      }
-    ]
-  },
-  {
-    label: "Group-D",
-    value: "Group-D",
-    applications: [
-      {
-        value: "application-31"
-      },
-      {
-        value: "application-32"
-      },
-      {
-        value: "application-33"
-      }
-    ]
-  },
-  {
-    label: "Group-E",
-    value: "Group-E",
-    applications: [
-      {
-        value: "application-41"
-      },
-      {
-        value: "application-42"
-      },
-      {
-        value: "application-43"
-      }
-    ]
-  },
-  {
-    label: "Group-F",
-    value: "Group-F",
-    applications: [
-      {
-        value: "application-51"
-      },
-      {
-        value: "application-52"
-      },
-      {
-        value: "application-53"
-      }
-    ]
-  },
-]
+  document.title = "Create Application - Protobuf Management"
 
-/**
- * 创建/编辑 Protobuf 信息页面
- * @param {boolean} created 是否是创建页面
- * @returns 
- */
-function EditProtobufPage({ created }) {
+  const { register, handleSubmit } = useForm();
 
-  document.title = created ? "Create Protobuf - Protobuf Management"
-    : "Edit Protobuf - Protobuf Management"
+  const onSubmit = (data) => {
+    const url = `/api/protobuf/${id}/intro`
+    fetch(url, { body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, method: "PATCH" })
+      .then(res => res.json())
+      .then(body => {
+        if (body.code === 0) {
+          alert("Create OK")
+        } else {
+          alert(body.message)
+        }
+      }, err => {
+        alert(err)
+      })
+  }
 
   const { id } = useParams()
-
-  const [group, setGroup] = useState("");
-  const [application, setApplication] = useState("");
-  const [name, setName] = useState("");
-  const protocol = 'grpc'
-  const owner = "nara"
-
-  if (!created) {
-    // TODO
-  }
-
-
-  const applications = useMemo(() => {
-    return mockGouprs.find(_group => _group.value === group)?.applications || []
-  }, [group])
-
-  const handleCreate = (event) => {
-    if (!event.target.form.checkValidity()) {
-      return
-    } else {
-      event.preventDefault()
-    }
-
-    const requestData = {
-      group: group,
-      application: application,
-      name: name,
-      protocol: protocol,
-      owner: owner,
-    }
-
-    fetch("/api/protobuf", {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    }).then(res => res.json())
-      .then(data => {
-        //TODO 创建重构 从定向
-        console.log(data)
-      }, error => {
-        console.log(error)
+  const [protobuf, setProtobuf] = useState({})
+  useEffect(() => {
+    const url = `/api/protobuf/${id}`
+    fetch(url)
+      .then(res => res.json())
+      .then(body => {
+        if (body.code === 0) {
+          setProtobuf(body.data)
+        } else {
+          alert(body.message)
+        }
+      }, err => {
+        alert(err)
       })
+  }, [id])
 
-  }
-
-  const handleEdit = (event) => {
-    if (!event.target.form.checkValidity()) {
-      return
-    } else {
-      event.preventDefault()
-    }
-
-    const requestData = {
-      group: group,
-      application: application,
-      name: name,
-      protocol: protocol,
-      owner: owner,
-    }
-
-    fetch(`/api/protobuf/${id}`, {
-      method: "PUT",
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    }).then(res => res.json())
-      .then(data => {
-        //TODO 创建重构 从定向
-        console.log(data)
-      }, error => {
-        console.log(error)
-      })
-
-  }
 
   return (
-    <Container component="article" sx={ { width: '50%' } } >
-      <Stack spacing={ 2 } component="form" autoComplete="off">
-        <FormControl fullWidth variant="standard">
-          <InputLabel id='group-select-label' required>Group</InputLabel>
-          <Select
-            labelId='group-select-label'
-            id='group-select'
-            value={ group }
-            label='Group'
-            required
-            onChange={ event => setGroup(event.target.value) }
-          >
-            {
-              mockGouprs.map(_group => (
-                <MenuItem key={ _group.value } value={ _group.value }>{ _group.label }</MenuItem>
-              ))
-            }
-          </Select>
-        </FormControl>
+    <MainPart backPath={"/protobuf/" + id} title="Edit Protobuf">
+      <Container component="section" sx={ { width: '50%' } } >
+        <Stack spacing={ 2 } component="form" autoComplete="off" onSubmit={ handleSubmit(onSubmit) }>
 
-        <FormControl fullWidth variant="standard">
-          <InputLabel id='application-select-label' required>Application</InputLabel>
-          <Select
-            labelId='application-select-label'
-            id='application-select'
-            value={ application }
-            label='Application'
-            required
-            onChange={ event => setApplication(event.target.value) }
-          >
-            {
-              applications.map(_application => (
-                <MenuItem key={ _application.value } value={ _application.value }>{ _application.value }</MenuItem>
-              ))
-            }
-          </Select>
-        </FormControl>
+          <FormControl variant="standard" sx={ { width: "30ch" } }>
+            <InputLabel id="group-select-label">Group</InputLabel>
+            <Select
+              labelId="group-select-label"
+              label="Group"
+              value={protobuf.group}
+            >
+            </Select>
+          </FormControl>
 
-        <TextField
-          label="Protobuf Name"
-          variant="standard"
-          fullWidth
-          required
-          value={ name }
-          onChange={ event => setName(event.target.value) }
-        />
+          <FormControl variant="standard" sx={ { width: "30ch" } }>
+            <InputLabel id="application-select-label">Group</InputLabel>
+            <Select
+              labelId="application-select-label"
+              label="Application"
+              value={ protobuf.application }
+            >
+            </Select>
+          </FormControl>
 
-        <TextField
-          label="protocol"
-          variant="standard"
-          sx={ { width: '25%' } }
-          defaultValue={ protocol }
-          InputProps={ { readOnly: true } }
-          required
-        />
+          <TextField
+            label="Name"
+            variant="standard"
+            sx={ { width: "30ch" } }
+            value={protobuf.name}
+          />
 
-        <TextField
-          label="Owner"
-          variant="standard"
-          sx={ { width: '25%' } }
-          defaultValue={ owner }
-          InputProps={ { readOnly: true } }
-          required
-        />
+          <TextField label="Intro"
+            fullWidth
+            variant="standard"
+            defaultValue={ protobuf.intro}
+            { ...register("intro") }
+          />
 
-        <Box sx={ { display: "flex", width: '100%' } }>
-          <span className="has-flex-grow-1"></span>
-          <Button
-            variant="text"
-            sx={ { width: 80 } }
-            size='large'
-            type="sumbit"
-            onClick={ handleCreate }
-          >
-            Create
-          </Button>
-        </Box>
-      </Stack>
+          <TextField label="Protocol"
+            fullWidth
+            variant="standard"
+            value={protobuf.protocol}
+            InputProps={ { readOnly: true } }
+          />
 
-    </Container>
+          <Box>
+            <Button type="sumbit" startIcon={ <CreateIcon /> }>
+              Update
+            </Button>
+          </Box>
+        </Stack>
+      </Container>
+    </MainPart>
+
   );
 }
 

@@ -3,6 +3,7 @@ package com.onemsg.protobuf.manager.protobuf;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,6 +96,12 @@ public class ProtobufService {
             throw new NotExistedException("PROTOBUF_CODE", id);
         }
         return detailVo;
+    }
+    
+    @Nullable
+    public ProtobufCode.DetailVo getCurrentProtobufCodeByProtobufId(int protobufId) throws NotExistedException {
+        existById(protobufId);
+        return protobufRepository.findCurrentCodeByProtobufId(protobufId);
     }
 
     public List<ProtobufCode.ItemVo> getProtobufCodesByProtobufId(int protobufId) throws NotExistedException {

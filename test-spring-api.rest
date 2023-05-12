@@ -1,15 +1,56 @@
 @devhost=http://localhost:5000
-@cookie=
+@cookie=auth_name=Spring;auth_token=3oo6h3a2n1h6q733ca
+
+## About user
+
+###
+POST {{devhost}}/api/login
+Content-Type: application/json
+Cookie: {{cookie}}
+
+{
+    "name": "Spring",
+    "password": "123456"
+}
+
+
+###
+POST {{devhost}}/api/logout
+Cookie: {{cookie}}
+
+###
+GET {{devhost}}/api/user/info
+Cookie: {{cookie}}
+
+# About Group
+###
+GET {{devhost}}/api/group
+Cookie: {{cookie}}
+
+###
+POST {{devhost}}/api/group
+Cookie: {{cookie}}
+Content-Type: application/json
+
+{
+    "name": "Group-Z",
+    "intro": "intro"
+}
+
+###
+GET {{devhost}}/api/group/name
+Cookie: {{cookie}}
 
 # About Application
+### 
+GET {{devhost}}/api/application
+Cookie: {{cookie}}
+
 
 ###
 GET {{devhost}}/api/application/name?groupId=1
 Cookie: {{cookie}}
 
-###
-GET {{devhost}}/api/application/groups
-Cookie: {{cookie}}
 
 ###
 POST {{devhost}}/api/application
@@ -19,7 +60,7 @@ Cookie: {{cookie}}
 {
     "name": "producer-server",
     "intro": "商家服务, 提供商家相关接口",
-    "groupId": 1
+    "groupId": 4
 
 }
 
@@ -32,11 +73,11 @@ GET {{devhost}}/api/protobuf?search=order-server
 Cookie: {{cookie}}
 
 ###
-GET {{devhost}}/api/protobuf?search=
+GET {{devhost}}/api/protobuf
 Cookie: {{cookie}}
 
 ###
-GET {{devhost}}/api/protobuf/5
+GET {{devhost}}/api/protobuf/1
 Cookie: {{cookie}}
 
 ###
@@ -45,7 +86,7 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-    "applicationId": 12,
+    "applicationId": 2,
     "name": "producer_service",
     "intro": "商家服务rpc接口",
     "protocol": "grpc"
@@ -74,42 +115,25 @@ DELETE {{devhost}}/api/protobuf/3
 Cookie: {{cookie}}
 
 ###
+GET {{devhost}}/api/protobuf/1/current-code
+Cookie: {{cookie}}
+
+
+###
 POST {{devhost}}/api/protobuf/code
 Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-    "protoId": 4,
+    "protoId": 1,
     "code": "code...",
     "creator": "onemsg"
 }
 
 ###
-GET {{devhost}}/api/protobuf/code/18
+GET {{devhost}}/api/protobuf/code/1
 Cookie: {{cookie}}
 
 ###
-GET {{devhost}}/api/protobuf/4/code
-Cookie: {{cookie}}
-
-
-## About user
-
-###
-POST {{devhost}}/api/login
-Content-Type: application/json
-Cookie: {{cookie}}
-
-{
-    "name": "Spring",
-    "password": "123456"
-}
-
-
-###
-POST {{devhost}}/api/logout
-Cookie: {{cookie}}
-
-###
-GET {{devhost}}/api/user/info
+GET {{devhost}}/api/protobuf/1/code
 Cookie: {{cookie}}

@@ -17,11 +17,15 @@ CREATE TABLE IF NOT EXISTS `resources` (
     `description` VARCHAR(256) NULL,
     `created_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uk_name (`name`)
-) CREATE TABLE IF NOT EXISTS `users_roles` (
+);
+
+CREATE TABLE IF NOT EXISTS `users_roles` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `user` CHAR(64) NOT NULL,
-    `role_id` INT NOT NULL ， UNIQUE KEY uk_name (`name`, `role_id`)
-)
+    `role_id` INT NOT NULL,
+    UNIQUE KEY uk_name (`user`, `role_id`)
+);
+
 /**Perms: Query=1 Create=2 Edit=4 Remove=8, can mix */
 CREATE TABLE IF NOT EXISTS `roles_perms` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,

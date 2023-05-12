@@ -1,3 +1,4 @@
 export const AUTH_HEADERS = {
-  "SERVICE-AUTH-USERNAME": "onemsg"
+  "X-AUTH-NAME": "Spring",
+  "X-AUTH-TOKEN": "6n5f705t1d4164d41"
 }

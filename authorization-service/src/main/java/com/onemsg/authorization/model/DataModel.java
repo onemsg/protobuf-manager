@@ -1,4 +1,4 @@
-package com.onemsg.authorization.model.response;
+package com.onemsg.authorization.model;
 
 import java.util.Map;
 

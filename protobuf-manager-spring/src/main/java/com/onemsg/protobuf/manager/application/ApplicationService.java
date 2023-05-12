@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.lang.Nullable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -29,32 +28,39 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @AllArgsConstructor
 public class ApplicationService implements InitializingBean {
-
-    private static final AtomicReference<Map<Integer, Application.Entity>> applicationStore = new AtomicReference<>();
-    private static final AtomicReference<Map<Integer, Group.Entity>> groupStore = new AtomicReference<>();
-
+    
     private final ApplicationRepository applicationRepository;
 
+    private final GroupService groupService;
+    
     private final ThreadPoolTaskExecutor executor;
+
+    private final AtomicReference<Map<Integer, Application.Entity>> applicationStore = new AtomicReference<>();
 
     @Scheduled(fixedDelay=30, timeUnit = TimeUnit.SECONDS)
     public void refreshStore() {
-        List<Group.Entity> groups = applicationRepository.findAllGroups();
         List<Application.Entity> applications = applicationRepository.findAll();
-        
-        Map<Integer, Group.Entity> groupMap = groups.stream()
-            .collect(Collectors.toMap(group -> group.id, Function.identity()));
-
         Map<Integer, Application.Entity> applicationMap = applications.stream()
                 .collect(Collectors.toMap(application -> application.id, Function.identity()));
-
-        groupStore.set(groupMap);
         applicationStore.set(applicationMap);
     }
 
-    @Async
-    public void asyncRefreshStore() {
+    private void asyncRefreshStore() {
         executor.submit(this::refreshStore);
+    }
+    
+    public List<Application.Entity> getAll() {
+        return applicationStore.get().values().stream()
+                .sorted(Comparator.comparing(Application.Entity::getId).reversed())
+                .toList();
+    }
+
+    public List<Application.NameVo> getNamesByGroupId(int groupId) {
+        return applicationStore.get().values().stream()
+                .filter(app -> app.groupId == groupId)
+                .map(Application.NameVo::create)
+                .sorted(Comparator.comparing(Application.NameVo::name))
+                .toList();
     }
 
     /**
@@ -65,32 +71,17 @@ public class ApplicationService implements InitializingBean {
      */
     @Transactional
     public int create(Application.Creation model, String creator) throws NotExistedException {
-        existGroupById(model.groupId());
+        groupService.existById(model.groupId());
         try {
             int id = applicationRepository.save(model.name(), model.intro(), model.groupId(), creator);
             asyncRefreshStore();
             return id;
         } catch (DuplicateKeyException e) {
-            throw new DataModelResponseException(400, 400, String.format("group/name [%s] 已存在", model.name()));
+            throw new DataModelResponseException(400, 400, String.format("Application name [%s] 已存在", model.name()));
         }
     }
-    
-    public List<Group.NameVo> getAllGroupNames() {
-        return groupStore.get().values().stream()
-            .map(Group.NameVo::create)
-            .sorted(Comparator.comparing(Group.NameVo::name))
-            .toList();
-    }
 
-    public List<Application.NameVo> getNamesByGroupId(int groupId) throws NotExistedException {
-        return applicationStore.get().values().stream()
-            .filter(app -> app.groupId == groupId)
-            .map(Application.NameVo::create)
-            .sorted(Comparator.comparing(Application.NameVo::name))
-            .toList();
-    }
 
-    
     /**
      * 
      * @param id
@@ -117,7 +108,7 @@ public class ApplicationService implements InitializingBean {
             return null;
         }
         Application.Model model = Application.Model.create(application);
-        Group.Entity group = groupStore.get().get(application.groupId);
+        Group.Entity group = groupService.getById(application.groupId);
         if (group == null) {
             return null;
         }
@@ -125,23 +116,16 @@ public class ApplicationService implements InitializingBean {
         return model;
     }
 
-    public void existGroupById(int groupId) throws NotExistedException {
-        boolean existed = applicationRepository.existGroupById(groupId);
-        if (!existed) {
-            throw new NotExistedException("GROUP", groupId);
-        }
-    }
-
     public void existById(int id) throws NotExistedException{
         boolean existed = applicationRepository.existById(id);
         if (!existed) {
-            throw new NotExistedException("APPLICATION", id);
+            throw new NotExistedException("Application", id);
         }
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
         refreshStore();
-        log.info("Load store ok");
+        log.info("Load application store ok");
     }
 }

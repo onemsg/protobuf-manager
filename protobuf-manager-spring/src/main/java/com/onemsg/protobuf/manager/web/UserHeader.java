@@ -38,6 +38,7 @@ public class UserHeader {
 
     private static String getCookieValue(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
+        if (cookies == null) return null;
         for (Cookie cookie : cookies) {
             if (Objects.equals(cookie.getName(), name)) {
                 return cookie.getValue();

@@ -1,13 +1,17 @@
 import { Toolbar } from "@mui/material";
 import React from "react";
+import BackTitle from "./BackTitle";
 
-function MainPart(props) {
+
+function MainPart({backPath, title, children}) {
+
   return (
-    <main className="main-part">
+    <main className={ "main-part " + (backPath ? "has-backpath" : "")}>
       <Toolbar variant="dense" />
-      <section className="main-part">
-        { props.children }
-      </section>
+      {
+        backPath && <BackTitle path={backPath} title={title} />
+      }
+      {children }
     </main>
   );
 }

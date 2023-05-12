@@ -16,6 +16,10 @@ public class Application {
         public String creator;
         public LocalDateTime createdTime;
         public LocalDateTime updatedTime;
+
+        public int getId() {
+            return id;
+        }
     }
 
     public static class Model{

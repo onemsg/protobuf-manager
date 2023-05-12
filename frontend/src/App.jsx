@@ -1,31 +1,40 @@
 import { Box } from '@mui/system';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigation } from 'react-router-dom';
 import './index.css';
 import AppHeader from './layout/AppHeader';
-import MainPart from './layout/MainPart';
-import CreateApplicationPage from './pages/create-application';
+import NavigationMenu from './layout/NavigationMenu';
 import Home from './pages/Home';
 import NotMatch from './pages/NotMatch';
-import ProtobufPage from './pages/protobuf';
-import EditProtobufFilePage from './pages/protobuf/EditProtobufFilePage';
-import EditProtobufPage from './pages/protobuf/EditProtobufPage'
+import ApplicationPage from './pages/application';
+import CreateApplicationPage from './pages/application/CreateApplicationPage';
+import GroupPage from './pages/group';
+import CreateGroupPage from './pages/group/CreateGroupPage';
+import ProtobufDetailPage from './pages/protobuf';
+import CreateProtobufPage from './pages/protobuf/CreateProtobufPage';
+import EditProtobufPage from './pages/protobuf/EditProtobufPage';
+import EditProtobufCodePage from './pages/protobuf/EditProtobufCodePage';
+import { LinearProgress } from '@mui/material';
+
+
 
 function App() {
+
   return (
     <Box sx={ { display: 'flex' } }>
       <AppHeader />
-
-      <MainPart>
-        <Routes>
-          <Route path='/' element={ <Home /> } />
-          <Route path='/protobuf/:id' element={ <ProtobufPage /> } />
-          <Route path='/protobuf/:id/edit' element={ <EditProtobufPage /> } />
-          <Route path='/protobuf/:id/edit-file' element={ <EditProtobufFilePage /> } />
-          <Route path='/create-application' element={ <CreateApplicationPage />} />
-          <Route path='/create-protobuf' element={ <EditProtobufPage created/> } />\
-          <Route path='*' element={ <NotMatch/> }></Route>
-        </Routes>
-      </MainPart>
+      <NavigationMenu />
+      <Routes>
+        <Route path='/' element={ <Home /> } />
+        <Route path='/protobuf/create' element={ <CreateProtobufPage /> } />
+        <Route path='/protobuf/:id' element={ <ProtobufDetailPage /> } />
+        <Route path='/protobuf/edit/:id' element={ <EditProtobufPage /> } />
+        <Route path='/protobuf/edit-code/:id' element={ <EditProtobufCodePage /> } />
+        <Route path='/application' element={ <ApplicationPage /> } />
+        <Route path='/application/create' element={ <CreateApplicationPage /> } />
+        <Route path='/group' element={ <GroupPage /> } />
+        <Route path='/group/create' element={ <CreateGroupPage /> } />
+        <Route path='*' element={ <NotMatch /> }></Route>
+      </Routes>
     </Box>
   );
 }

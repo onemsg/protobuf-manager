@@ -13,7 +13,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import com.onemsg.protobuf.manager.application.model.Application;
-import com.onemsg.protobuf.manager.application.model.Group;
 
 
 @Repository
@@ -36,17 +35,7 @@ public class ApplicationRepository {
             SELECT id, name, intro, group_id, creator, created_time, updated_time
             FROM `application`
             """;
-        return jdbcTemplate.query(sql, A_E_RM);
-    }
-
-
-    public List<Group.Entity> findAllGroups() {
-        String sql = """
-            SELECT id, name, intro, created_time, updated_time
-            FROM `group`
-            """;
-        return jdbcTemplate.query(sql, G_E_RM);
-
+        return jdbcTemplate.query(sql, APPLICATION_ROWMAPPER);
     }
 
     public boolean existById(int id){
@@ -91,12 +80,7 @@ public class ApplicationRepository {
         jdbcTemplate.update(sql, intro, id);
     }
 
-    public boolean existGroupById(int groupId){
-        String sql = "SELECT count(id) FROM `group` WHERE `id` = ?";
-        return jdbcTemplate.queryForObject(sql, Integer.class, groupId) > 0;
-    }
-
-    private static final RowMapper<Application.Entity> A_E_RM =  (rs, rowNum) -> {
+    private static final RowMapper<Application.Entity> APPLICATION_ROWMAPPER =  (rs, rowNum) -> {
 
         var entity = new Application.Entity();
         entity.id = rs.getInt("id");
@@ -104,17 +88,6 @@ public class ApplicationRepository {
         entity.intro = rs.getString("intro");
         entity.groupId = rs.getInt("group_id");
         entity.creator = rs.getString("creator");
-        entity.createdTime = rs.getTimestamp("created_time").toLocalDateTime();
-        entity.updatedTime = rs.getTimestamp("updated_time").toLocalDateTime();
-        return entity;
-    };
-
-    private static final RowMapper<Group.Entity> G_E_RM = (rs, rowNum) -> {
-
-        var entity = new Group.Entity();
-        entity.id = rs.getInt("id");
-        entity.name = rs.getString("name");
-        entity.intro = rs.getString("intro");
         entity.createdTime = rs.getTimestamp("created_time").toLocalDateTime();
         entity.updatedTime = rs.getTimestamp("updated_time").toLocalDateTime();
         return entity;

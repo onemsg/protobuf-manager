@@ -158,6 +158,18 @@ public class ProtobufRepository {
         return DataAccessUtils.singleResult(jdbcTemplate.query(sql, PC_D_RM, codeId));
     }
 
+    @Nullable
+    public ProtobufCode.DetailVo findCurrentCodeByProtobufId(int protobufId) {
+        String sql = """
+                SELECT id, protobuf_id, code, version, creator, created_time
+                FROM `protobuf_code` 
+                WHERE protobuf_id = ?
+                    AND version in (SELECT current_version FROM `protobuf` WHERE id = ?)
+        """;
+        return DataAccessUtils.singleResult(jdbcTemplate.query(sql, PC_D_RM, protobufId, protobufId));
+    }
+
+
     public List<ProtobufCode.ItemVo> findCodesByProtobufId(int protobufId) {
         String sql = """
             SELECT pc.id, pc.protobuf_id, pc.version, pc.version = p.current_version as is_current, pc.creator, pc.created_time
