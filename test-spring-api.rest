@@ -1,5 +1,5 @@
 @devhost=http://localhost:5000
-@cookie=auth_name=Spring;auth_token=3oo6h3a2n1h6q733ca
+@cookie=auth_name=Spring;auth_token=6s2y463m5t30667605s
 
 ## About user
 
@@ -137,3 +137,27 @@ Cookie: {{cookie}}
 ###
 GET {{devhost}}/api/protobuf/1/code
 Cookie: {{cookie}}
+
+###
+GET {{devhost}}/sleep?time=1000
+Cookie: {{cookie}}
+
+###
+GET {{devhost}}/test-null
+
+###
+GET {{devhost}}/test-null-html
+# Accept: text/html
+
+###
+GET {{devhost}}/error
+
+###
+GET {{devhost}}/test-exception
+
+###
+GET {{devhost}}/test-exception
+Accept: text/html
+
+###
+GET  {{devhost}}/404

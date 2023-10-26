@@ -62,3 +62,10 @@ GET {{devhost}}/api/400
 
 
 
+$ jlink `
+         --add-modules java.base `
+         --strip-debug `
+         --no-man-pages `
+         --no-header-files `
+         --compress=2 `
+         --output /javaruntime
