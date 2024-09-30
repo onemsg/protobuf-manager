@@ -3,90 +3,104 @@ package com.onemsg.protobuf.manager.application;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.sql.DataSource;
+import java.util.Optional;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
-import com.onemsg.protobuf.manager.application.model.Application;
+import com.onemsg.protobuf.manager.application.model.ApplicationEntity;
+import com.onemsg.protobuf.manager.application.model.ApplicationCreation;
 
 
 @Repository
 public class ApplicationRepository {
     
-    private JdbcTemplate jdbcTemplate;
     private SimpleJdbcInsert insertApplication;
 
-    public ApplicationRepository(DataSource dataSource) {
-        jdbcTemplate = new JdbcTemplate(dataSource);
+    private final JdbcClient jdbcClient;
+
+    public ApplicationRepository(JdbcTemplate jdbcTemplate, JdbcClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
         insertApplication = new SimpleJdbcInsert(jdbcTemplate)
             .withTableName("application")
-            .usingColumns("name", "intro", "group_id", "creator")
+            .usingColumns("name", "zhName", "intro", "group_id", "group_name", "creator")
             .usingGeneratedKeyColumns("id");
     }
 
-
-    public List<Application.Entity> findAll() {
+    public List<ApplicationEntity> findAllByGroupName(String groupName) {
         String sql = """
-            SELECT id, name, intro, group_id, creator, created_time, updated_time
+            SELECT id, name, zhName, intro, group_name, creator, created_time, updated_time
             FROM `application`
+            WHERE group_name = ?;
             """;
-        return jdbcTemplate.query(sql, APPLICATION_ROWMAPPER);
+        return jdbcClient.sql(sql)
+            .param(groupName)
+            .query(APPLICATION_ENTITY_ROWMAPPER)
+            .list();
     }
 
-    public boolean existById(int id){
-        String sql = "SELECT count(id) FROM `application` WHERE `id` = ?";
-        return jdbcTemplate.queryForObject(sql, Integer.class, id) > 0;
+
+    public List<ApplicationEntity> findAll() {
+        String sql = "SELECT id, name, creator, created_time FROM `application`";
+        return jdbcClient.sql(sql)
+            .query(APPLICATION_ENTITY_ROWMAPPER)
+            .list();
+    }
+
+    public Optional<ApplicationEntity> findById(int id) {
+        String sql = "SELECT id, name, creator, created_time FROM `application` WHERE id = ?";
+        return jdbcClient.sql(sql)
+            .param(id)
+            .query(APPLICATION_ENTITY_ROWMAPPER)
+            .optional();
     }
 
     /**
-     * 
-     * @param name
-     * @param intro
-     * @param groupId
-     * @param creator
-     * @return
-     * @exception DuplicateKeyException 如果 name+groupId 重复
+     * @return 新保存对象 ID
+     * @exception DuplicateKeyException 如果 name+groupName 重复
      */
-    public int save(String name, String intro, int groupId, String creator) throws DuplicateKeyException {
+    public int save(ApplicationCreation application) throws DuplicateKeyException {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("name", name);
-        parameters.put("intro", intro);
-        parameters.put("group_id", groupId);
-        parameters.put("creator", creator);
+        parameters.put("name", application.name);
+        parameters.put("zhName", application.zhName);
+        parameters.put("intro", application.intro);
+        parameters.put("group_id", application.groupId);
+        parameters.put("group_name", application.groupName);
+        parameters.put("creator", application.creator);
         Number id = insertApplication.executeAndReturnKey(parameters);
         return id.intValue();
     }
 
-    public int delete(int id){
+    public int update(int id, String zhName, String intro) {
+        String sql = """
+                UPDATE `application` 
+                SET zhName = IFNULL(:zhName, zhName), intro = IFNULL(:intro, intro)
+                WHERE id = :id;
+                """;
+        return jdbcClient.sql(sql)
+            .param("zhName", zhName)
+            .param("intro", intro)
+            .param("id", id)
+            .update();
+    }
+
+    public int delete(int id) {
         String sql = "DELETE FROM `application` WHERE `id` = ?";
-        int count = jdbcTemplate.update(sql, id);
-
-        String sql3 = "DELETE FROM `protobuf_code` WHERE protobuf_id in "
-                + "(SELECT id FROM `protobuf` WHERE application_id = ?) ";
-        jdbcTemplate.update(sql3, id);
-
-        String sql2 = "DELETE FROM `protobuf` WHERE application_id = ?";
-        jdbcTemplate.update(sql2, id);
-        return count;
+        return jdbcClient.sql(sql).param(id).update();
     }
 
-    public void updateIntroById(int id, String intro){
-        String sql = "UPDATE `application` SET `intro` = ? WHERE `id` = ?";
-        jdbcTemplate.update(sql, intro, id);
-    }
-
-    private static final RowMapper<Application.Entity> APPLICATION_ROWMAPPER =  (rs, rowNum) -> {
-
-        var entity = new Application.Entity();
+    private static final RowMapper<ApplicationEntity> APPLICATION_ENTITY_ROWMAPPER =  (rs, rowNum) -> {
+        var entity = new ApplicationEntity();
         entity.id = rs.getInt("id");
         entity.name = rs.getString("name");
+        entity.zhName = rs.getString("zh_name");
         entity.intro = rs.getString("intro");
         entity.groupId = rs.getInt("group_id");
+        entity.groupName = rs.getString("group_name");
         entity.creator = rs.getString("creator");
         entity.createdTime = rs.getTimestamp("created_time").toLocalDateTime();
         entity.updatedTime = rs.getTimestamp("updated_time").toLocalDateTime();

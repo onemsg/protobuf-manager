@@ -1,5 +1,5 @@
 @devhost=http://localhost:5000
-@cookie=auth_name=Spring;auth_token=6s2y463m5t30667605s
+@cookie=auth_name=SuperTestUser;auth_token=123456
 
 ## About user
 
@@ -86,9 +86,10 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-    "applicationId": 2,
     "name": "producer_service",
     "intro": "商家服务rpc接口",
+    "groupName": "Group-A",
+    "applicationName": "Application-1",
     "protocol": "grpc"
 }
 
@@ -125,17 +126,17 @@ Content-Type: application/json
 Cookie: {{cookie}}
 
 {
-    "protoId": 1,
+    "protobufId": 1,
     "code": "code...",
     "creator": "onemsg"
 }
 
 ###
-GET {{devhost}}/api/protobuf/code/1
+GET {{devhost}}/api/protobuf/code/2
 Cookie: {{cookie}}
 
 ###
-GET {{devhost}}/api/protobuf/1/code
+GET {{devhost}}/api/protobuf/1/code-version
 Cookie: {{cookie}}
 
 ###
