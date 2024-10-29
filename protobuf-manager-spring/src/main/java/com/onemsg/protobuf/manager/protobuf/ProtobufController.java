@@ -1,9 +1,17 @@
 package com.onemsg.protobuf.manager.protobuf;
 
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileSystemUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,9 +24,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.onemsg.protobuf.manager.exception.DataModelResponseException;
 import com.onemsg.protobuf.manager.exception.NotExistedException;
+import com.onemsg.protobuf.manager.function.CheckedRunnable;
+import com.onemsg.protobuf.manager.gen.GrpcClientMavenGenerator;
+import com.onemsg.protobuf.manager.gen.LocalProtocRunner;
+import com.onemsg.protobuf.manager.gen.MavenBaseInfo;
+import com.onemsg.protobuf.manager.gen.ProtocExecException;
 import com.onemsg.protobuf.manager.model.Pageable;
+import com.onemsg.protobuf.manager.protobuf.model.GenerateClientJarRequest;
 import com.onemsg.protobuf.manager.protobuf.model.ProtobufCodeCreation;
 import com.onemsg.protobuf.manager.protobuf.model.ProtobufCodeCreationRequest;
+import com.onemsg.protobuf.manager.protobuf.model.ProtobufCodeRequest;
 import com.onemsg.protobuf.manager.protobuf.model.ProtobufInfoCreation;
 import com.onemsg.protobuf.manager.protobuf.model.ProtobufInfoCreationRequest;
 import com.onemsg.protobuf.manager.protobuf.model.ProtobufInfoUpdateIntroRequest;
@@ -26,22 +41,32 @@ import com.onemsg.protobuf.manager.protobuf.model.ProtobufInfoUpdateVersionReque
 import com.onemsg.protobuf.manager.web.DataModel;
 import com.onemsg.protobuf.manager.web.WebContext;
 
+import io.undertow.servlet.spec.HttpServletResponseImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@AllArgsConstructor
 @RestController
 @RequestMapping("/api/protobuf")
 public class ProtobufController {
 
     @Autowired
-    private final ProtobufInfoService protobufService;
-    
+    private ProtobufInfoService protobufService;
+
     @Autowired
-    private final Validator validator;
+    private LocalProtocRunner protocRunner;
+
+    @Autowired
+    private GrpcClientMavenGenerator clientGenerator;
+
+    @Autowired
+    private Validator validator;
+
+    @Autowired
+    @Qualifier("applicationTaskExecutor")
+    private AsyncTaskExecutor executor;
 
     /**
      * 
@@ -126,6 +151,8 @@ public class ProtobufController {
             throws NotExistedException {
 
         validate(request);
+        compileProtobufCode(request.code);
+
         var user = WebContext.currentWebContext().getUser();
         ProtobufCodeCreation creation = ProtobufCodeCreation.create(request, user.name());
         int id = protobufService.createProtobufCode(creation);
@@ -145,6 +172,82 @@ public class ProtobufController {
         var data = protobufService.getProtobufCodeByProtobufIdAndVersion(protobufId, version);
         return DataModel.ok(data);
     }
+
+    @GetMapping("/tools/compile-check")
+    public DataModel compileCheck(@RequestBody ProtobufCodeRequest request) {
+        if (!StringUtils.hasText(request.code())) {
+            throw new DataModelResponseException(400, 400, "Protobuf code 不能为空" );
+        }
+        compileProtobufCode(request.code());
+        return DataModel.ok("Protobuf 编译通过");
+    }
+
+    @SuppressWarnings("null")
+    @GetMapping("/tools/generate-client-jar")
+    public void generateClientProject(GenerateClientJarRequest request, HttpServletResponse servletResponse) throws NotExistedException {
+        validate(request);
+
+        var protobufInfo = protobufService.getInfoById(request.protobufId());
+        var protobufCodeEntity = switch(request.version()) {
+            case null -> protobufService.getCurrentProtobufCodeByProtobufId(request.protobufId());
+            default -> protobufService.getProtobufCodeByProtobufIdAndVersion(request.protobufId(), request.version());
+        };
+
+        MavenBaseInfo mavenBaseInfo = new MavenBaseInfo();
+        mavenBaseInfo.groupId = Objects.requireNonNullElse(request.groupId(), "com.onemsg.grpc.client");
+        mavenBaseInfo.artifactId = Objects.requireNonNullElse(request.artifactId(), 
+            protobufInfo.id + "-" + protobufInfo.name + "-client");
+        mavenBaseInfo.version = protobufCodeEntity.getVersionText();
+        mavenBaseInfo.name = protobufInfo.getFullName() + " client jar";
+
+        try {
+            var zipPath = clientGenerator.generateClientProject(mavenBaseInfo, protobufInfo.name, protobufCodeEntity.code);
+            servletResponse.setContentType("application/octet-stream");
+            servletResponse.setHeader("Content-Disposition", "attachment;filename=" + zipPath.getFileName());
+            servletResponse.setStatus(HttpServletResponse.SC_OK);
+            Files.copy(zipPath, servletResponse.getOutputStream());
+            servletResponse.flushBuffer();
+        } catch (Exception e) {
+            throw new DataModelResponseException(500, 500, "生成客户端代码失败")
+                .addProperty("errorDetail", e.toString());
+        }
+        
+    }
+
+    private void compileProtobufCode(String code) throws DataModelResponseException {
+
+        Path tempDir = null;
+        try {
+            tempDir = Files.createTempDirectory("protobuf-check-");
+            var protoPath = Files.createTempFile(tempDir, "", ".proto");
+            var outPath = Files.createDirectories(tempDir.resolve("out"));
+            Files.writeString(protoPath, code);
+            protocRunner.generateGrpcJavaCodes(protoPath, outPath);
+        } catch (Exception e) {
+            if (e instanceof ProtocExecException pe && pe.getErrorDetail() != null) {
+                throw new DataModelResponseException(400, 400, "Protobuf 编译失败")
+                    .addProperty("errorDetail", pe.getErrorDetail());
+            }
+            throw new DataModelResponseException(500, 500, "Protobuf 编译执行失败")
+                .addProperty("errorDetail", e.toString());
+        } finally {
+            if (tempDir != null) {
+                var dir = tempDir;
+                submit("Delete tempDir " + dir, () -> FileSystemUtils.deleteRecursively(dir));
+            }
+        }
+    }
+
+    private void submit(String taskName, CheckedRunnable<?> task) {
+        executor.submit(() -> {
+            try {
+                task.run();
+            } catch (Exception e) {
+               log.warn("Task run failed: {}", taskName, e);
+            }
+        });
+    }
+
 
     private <T> void validate(T data) {
         var errors = validator.validate(data);

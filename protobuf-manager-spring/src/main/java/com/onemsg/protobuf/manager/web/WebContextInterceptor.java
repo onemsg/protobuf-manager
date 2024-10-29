@@ -3,7 +3,6 @@ package com.onemsg.protobuf.manager.web;
 
 import java.util.Objects;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -31,7 +30,6 @@ public class WebContextInterceptor implements HandlerInterceptor {
     }
 
     
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {

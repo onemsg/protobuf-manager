@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.onemsg.protobuf.manager.exception.NotExistedException;
+import com.onemsg.protobuf.manager.gen.GrpcClientMavenGenerator;
+import com.onemsg.protobuf.manager.gen.LocalProtocRunner;
 import com.onemsg.protobuf.manager.model.Pageable;
 import com.onemsg.protobuf.manager.model.Totalable;
 import com.onemsg.protobuf.manager.protobuf.model.ProtobufCodeCreation;
@@ -24,7 +26,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ProtobufInfoService {
 
-    @Autowired
     private final ProtobufInfoRepository protobufInfoRepository;
 
     /**

@@ -29,7 +29,7 @@ public class ProtobufInfoRepository {
 
     public List<ProtobufInfoEntity> search(String search, int skip, int limit) {
         String sql = """
-            SELECT id, name, intro, application_name group_name, protocol, current_version, creator, created_time, updated_time
+            SELECT id, name, intro, application_name, group_name, protocol, current_version, creator, created_time, updated_time
             FROM `protobuf_info`
             WHERE group_name like ? OR application_name like ? OR name like ? OR creator like ?
             ORDER BY id DESC
@@ -56,7 +56,7 @@ public class ProtobufInfoRepository {
 
     public List<ProtobufInfoEntity> search(int skip, int limit) {
         String sql = """
-            SELECT id, name, intro, application_name group_name, protocol, current_version, creator, created_time, updated_time
+            SELECT id, name, intro, application_name, group_name, protocol, current_version, creator, created_time, updated_time
             FROM `protobuf_info`
             ORDER BY id DESC
             LIMIT ?,?
@@ -72,7 +72,7 @@ public class ProtobufInfoRepository {
 
     public Optional<ProtobufInfoEntity> findById(int id) {
         String sql = """
-            SELECT id, name, intro, application_name group_name, protocol, current_version, creator, created_time, updated_time
+            SELECT id, name, intro, application_name, group_name, protocol, current_version, creator, created_time, updated_time
             FROM `protobuf_info` WHERE id = ?
         """;
         return jdbcClient.sql(sql).param(id).query(ProtobufInfoEntity.class).optional();
@@ -163,7 +163,7 @@ public class ProtobufInfoRepository {
                    FROM `protobuf_code` 
                    WHERE protobuf_id = ? AND version = ?
             """; 
-        return jdbcClient.sql(sql).param(protobufId, version).query(ProtobufCodeEntity.class).optional();
+        return jdbcClient.sql(sql).params(protobufId, version).query(ProtobufCodeEntity.class).optional();
     }
 
     public Optional<ProtobufCodeEntity> findCurrentCodeByProtobufId(int protobufId) {
@@ -171,9 +171,10 @@ public class ProtobufInfoRepository {
                 SELECT id, protobuf_id, protobuf_name, code, version, creator, created_time
                 FROM `protobuf_code` 
                 WHERE protobuf_id = ?
-                    AND version in (SELECT current_version FROM `current_version` WHERE id = ?)
+                    AND version in (SELECT current_version FROM `protobuf_info` WHERE id = ?)
         """;
-        return jdbcClient.sql(sql).param(protobufId, protobufId).query(ProtobufCodeEntity.class).optional();
+        return jdbcClient.sql(sql).params(protobufId, protobufId)
+            .query(ProtobufCodeEntity.class).optional();
     }
 
     public boolean existsCodeByProtobufIdAndVersion(int protobufId, int version) {
@@ -182,7 +183,7 @@ public class ProtobufInfoRepository {
                 FROM `protobuf_code`
                 WHERE protobuf_id = ? AND version = ?
                 """;
-        return jdbcClient.sql(sql).param(protobufId, version).query(int.class).single() > 0;    
+        return jdbcClient.sql(sql).params(protobufId, version).query(int.class).single() > 0;    
     }
 
     public List<ProtobufCodeVersion> findCodeVersionListByProtobufId(int protobufId) {

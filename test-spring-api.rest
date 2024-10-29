@@ -127,7 +127,44 @@ Cookie: {{cookie}}
 
 {
     "protobufId": 1,
-    "code": "code...",
+    "code": "syntax = \"proto3\";
+package tutorial;
+
+option java_multiple_files = true;
+option java_package = \"com.example.tutorial.protos\";
+
+message Person {
+  string name = 1;
+   int32 id = 2;
+   string email = 3;
+
+  enum PhoneType {
+    PHONE_TYPE_UNSPECIFIED = 0;
+    PHONE_TYPE_MOBILE = 2;
+    PHONE_TYPE_HOME = 2;
+    PHONE_TYPE_WORK = 3;
+  }
+
+  message PhoneNumber {
+     string number = 1;
+     PhoneType type = 2;
+  }
+
+  repeated PhoneNumber phones = 4;
+}
+
+message AddressBook {
+  repeated Person people = 1;
+}
+
+message FindPersonRequest {
+  int32 id = 1;
+}
+
+service PersonService {
+
+  rpc FindPerson (FindPersonRequest) returns (Person) {};
+}",
     "creator": "onemsg"
 }
 
@@ -138,6 +175,11 @@ Cookie: {{cookie}}
 ###
 GET {{devhost}}/api/protobuf/1/code-version
 Cookie: {{cookie}}
+
+### 生成客户端代码
+GET {{devhost}}/api/protobuf/tools/generate-client-jar?protobufId=1
+Cookie: {{cookie}}
+
 
 ###
 GET {{devhost}}/sleep?time=1000

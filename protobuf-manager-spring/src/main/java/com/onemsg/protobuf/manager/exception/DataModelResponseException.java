@@ -34,7 +34,7 @@ public class DataModelResponseException extends RuntimeException {
         this.status = status;
         this.code = code;
         this.message = message;
-        this.properties =properties;
+        this.properties = properties;
     }
 
     public DataModelResponseException(NotExistedException exception) {
